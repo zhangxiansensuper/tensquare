@@ -162,4 +162,8 @@ public class EnterpriseService {
 
 	}
 
+	public List<Enterprise> hotList(String ishot){
+		return enterpriseDao.findByIshot(ishot);
+	}
+
 }

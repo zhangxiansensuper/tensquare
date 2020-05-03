@@ -178,4 +178,22 @@ public class RecruitService {
 
 	}
 
+	/**
+	 * 查询推荐职位列表
+	 * @param state
+	 * @return
+	 */
+	public List<Recruit> findTop4ByStateOrderByCreatetimeDesc(String state){
+		return recruitDao.findTop4ByStateOrderByCreatetimeDesc(state);
+	}
+
+	/**
+	 * 最新职位列表
+	 * @param state
+	 * @return
+	 */
+	public List<Recruit> findTop12ByStateOrderByCreatetimeDesc(String state){
+		return recruitDao.findTop12ByStateOrderByCreatetimeDesc(state);
+	}
+
 }
