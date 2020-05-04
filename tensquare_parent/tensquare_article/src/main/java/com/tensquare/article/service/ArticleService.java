@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -17,8 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import util.IdWorker;
 
 import com.tensquare.article.dao.ArticleDao;
@@ -38,6 +41,9 @@ public class ArticleService {
 	
 	@Autowired
 	private IdWorker idWorker;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
 
 	/**
 	 * 查询全部列表
@@ -78,7 +84,15 @@ public class ArticleService {
 	 * @return
 	 */
 	public Article findById(String id) {
-		return articleDao.findById(id).get();
+		//先从redis中查询
+		Article article = (Article) redisTemplate.opsForValue().get("article_"+id);
+		if(article == null ){
+			//如果缓存中查不到数据，则到数据库中查询
+			article = articleDao.findById(id).get();
+			//存入到缓存中
+			redisTemplate.opsForValue().set("article_"+id,article,10, TimeUnit.SECONDS);
+		}
+		return article;
 	}
 
 	/**
@@ -95,6 +109,7 @@ public class ArticleService {
 	 * @param article
 	 */
 	public void update(Article article) {
+		redisTemplate.delete("article_"+article.getId());
 		articleDao.save(article);
 	}
 
@@ -103,6 +118,7 @@ public class ArticleService {
 	 * @param id
 	 */
 	public void deleteById(String id) {
+		redisTemplate.delete("article_"+id);
 		articleDao.deleteById(id);
 	}
 
@@ -172,6 +188,24 @@ public class ArticleService {
 			}
 		};
 
+	}
+
+	/**
+	 * 文章审核
+	 * @param id
+	 */
+	@Transactional
+	public void verifyArticle(String id){
+		articleDao.verifyArticle(id);
+	}
+
+	/**
+	 * 文章点赞
+	 * @param id
+	 */
+	@Transactional
+	public void addThumbup(String id){
+		articleDao.addThumbup(id);
 	}
 
 }
