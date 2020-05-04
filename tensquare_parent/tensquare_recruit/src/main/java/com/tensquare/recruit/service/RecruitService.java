@@ -192,8 +192,8 @@ public class RecruitService {
 	 * @param state
 	 * @return
 	 */
-	public List<Recruit> findTop12ByStateOrderByCreatetimeDesc(String state){
-		return recruitDao.findTop12ByStateOrderByCreatetimeDesc(state);
+	public List<Recruit> findTop12ByStateNotOrderByCreatetimeDesc(String state){
+		return recruitDao.findTop12ByStateNotOrderByCreatetimeDesc(state);
 	}
 
 }

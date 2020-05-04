@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -104,5 +105,46 @@ public class ProblemController {
 		problemService.deleteById(id);
 		return new Result(true,StatusCode.OK,"删除成功");
 	}
-	
+
+	/**
+	 * 查询最新问答列表
+	 * @param labelid
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	@RequestMapping(value = "/newlist/{labelid}/{page}/{size}",method = RequestMethod.GET)
+	public Result newList(@PathVariable String labelid, @PathVariable int page, @PathVariable int size){
+		Page<Problem> pageProblem = problemService.newList(labelid,page,size);
+		PageResult<Problem> pageResult = new PageResult<>(pageProblem.getTotalElements(),pageProblem.getContent());
+		return new Result(true,StatusCode.OK,"查询成功",pageResult);
+	}
+
+	/**
+	 * 查询最热问答列表
+	 * @param labelid
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	@RequestMapping(value = "/hotlist/{labelid}/{page}/{size}",method = RequestMethod.GET)
+	public Result hotList(@PathVariable String labelid, @PathVariable int page, @PathVariable int size){
+		Page<Problem> pageHot = problemService.hotList(labelid, page,size);
+		PageResult<Problem> pageResult = new PageResult<>(pageHot.getTotalElements(),pageHot.getContent());
+		return new Result(true,StatusCode.OK,"查询成功",pageResult);
+	}
+
+	/**
+	 * 查询等待回答列表
+	 * @param labelid
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	@RequestMapping(value = "/waitlist/{labelid}/{page}/{size}",method = RequestMethod.GET)
+	public Result waitList(@PathVariable String labelid, @PathVariable int page, @PathVariable int size){
+		Page<Problem> pageWait = problemService.waitList(labelid, page ,size);
+		PageResult<Problem> pageResult = new PageResult<>(pageWait.getTotalElements(),pageWait.getContent());
+		return new Result(true, StatusCode.OK,"查询成功",pageResult);
+	}
 }

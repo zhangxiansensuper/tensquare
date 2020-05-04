@@ -20,5 +20,5 @@ public interface RecruitDao extends JpaRepository<Recruit,String>,JpaSpecificati
      */
     public List<Recruit> findTop4ByStateOrderByCreatetimeDesc(String state);
 
-    public List<Recruit> findTop12ByStateOrderByCreatetimeDesc(String state);
+    public List<Recruit> findTop12ByStateNotOrderByCreatetimeDesc(String state);
 }
