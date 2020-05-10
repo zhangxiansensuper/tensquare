@@ -143,4 +143,16 @@ public class AdminService {
 
 	}
 
+	/**
+	 * 管理员登录
+	 * @param admin
+	 * @return
+	 */
+	public Admin login(Admin admin) {
+		Admin adminLogin = adminDao.findByLoginname(admin.getLoginname());
+		if (adminLogin != null && encoder.matches(admin.getPassword(),adminLogin.getPassword())){
+			return  adminLogin;
+		}
+		return null;
+	}
 }
