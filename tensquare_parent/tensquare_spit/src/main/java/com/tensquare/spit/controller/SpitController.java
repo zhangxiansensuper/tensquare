@@ -5,14 +5,12 @@ import com.tensquare.spit.service.SpitService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
-import jdk.net.SocketFlow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 吐槽类controller层

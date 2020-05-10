@@ -1,7 +1,7 @@
 package com.tensquare.article.controller;
 
-import com.tensquare.article.pojo.Comment;
 import com.tensquare.article.service.CommentService;
+import com.tensquare.article.pojo.Comment;
 import entity.Result;
 import entity.StatusCode;
 import org.springframework.beans.factory.annotation.Autowired;

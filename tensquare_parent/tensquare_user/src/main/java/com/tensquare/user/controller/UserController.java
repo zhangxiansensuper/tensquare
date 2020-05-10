@@ -1,9 +1,10 @@
 package com.tensquare.user.controller;
-import java.util.List;
 import java.util.Map;
 
+import com.tensquare.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tensquare.user.pojo.User;
-import com.tensquare.user.service.UserService;
 
 import entity.PageResult;
 import entity.Result;
@@ -29,8 +29,10 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
-	
+
+	@Autowired
+	private RedisTemplate redisTemplate;
+
 	/**
 	 * 查询全部数据
 	 * @return
@@ -47,7 +49,10 @@ public class UserController {
 	 */
 	@RequestMapping(value="/{id}",method= RequestMethod.GET)
 	public Result findById(@PathVariable String id){
-		return new Result(true,StatusCode.OK,"查询成功",userService.findById(id));
+		if (userService.findById(id) != null){
+			return new Result(true,StatusCode.OK,"查询成功",userService.findById(id));
+		}
+		return new Result(false,StatusCode.ERROR,"查询失败");
 	}
 
 
@@ -103,6 +108,36 @@ public class UserController {
 	public Result delete(@PathVariable String id ){
 		userService.deleteById(id);
 		return new Result(true,StatusCode.OK,"删除成功");
+	}
+
+	/**
+	 * 发送短信验证码
+	 * @param mobile
+	 * @return
+	 */
+	@RequestMapping(value = "/sendsms/{mobile}",method = RequestMethod.POST)
+	public Result sendSms(@PathVariable String mobile){
+		userService.sendSms(mobile);
+		return new Result(true,StatusCode.OK,"发送成功！");
+	}
+
+	/**
+	 * 用户注册
+	 * @param code
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value = "/register/{code}", method = RequestMethod.POST)
+	public Result regist(@PathVariable String code, @RequestBody User user){
+		String codeRedis = (String) redisTemplate.opsForValue().get("checkcode_"+user.getMobile());
+		if(codeRedis.isEmpty()){
+			return new Result(false,StatusCode.ERROR,"请先获取注册码！");
+		}
+		if(!codeRedis.equals(code)){
+			return new Result(false,StatusCode.ERROR,"验证码错误!");
+		}
+		userService.add(user);
+		return new Result(true,StatusCode.OK,"注册成功！");
 	}
 	
 }

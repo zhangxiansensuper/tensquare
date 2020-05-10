@@ -1,28 +1,23 @@
 package com.tensquare.user.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-
+import com.tensquare.user.dao.UserDao;
+import com.tensquare.user.pojo.User;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
 import util.IdWorker;
 
-import com.tensquare.user.dao.UserDao;
-import com.tensquare.user.pojo.User;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 服务层
@@ -38,6 +33,12 @@ public class UserService {
 	
 	@Autowired
 	private IdWorker idWorker;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	/**
 	 * 查询全部列表
@@ -78,7 +79,11 @@ public class UserService {
 	 * @return
 	 */
 	public User findById(String id) {
-		return userDao.findById(id).get();
+		if(userDao.findById(id).get() != null){
+			return userDao.findById(id).get();
+		}else {
+			return null;
+		}
 	}
 
 	/**
@@ -87,6 +92,12 @@ public class UserService {
 	 */
 	public void add(User user) {
 		user.setId( idWorker.nextId()+"" );
+		user.setFollowcount(0);//关注数
+		user.setFanscount(0);//粉丝数
+		user.setOnline(0L);//在线时长
+		user.setRegdate(new Date());//注册日期
+		user.setUpdatedate(new Date());//更新日期
+		user.setLastdate(new Date());//最后登陆日期
 		userDao.save(user);
 	}
 
@@ -162,4 +173,22 @@ public class UserService {
 
 	}
 
+	/**
+	 * 发送短信验证码
+	 * @param mobile
+	 */
+    public void sendSms(String mobile) {
+    	//生成六位随机数
+		String checkcode = RandomStringUtils.randomNumeric(6);
+		//向缓存中寸一份验证码
+		redisTemplate.opsForValue().set("checkcode_"+mobile,checkcode,5, TimeUnit.MINUTES);
+		//发送验证码到用户
+		Map<String,String> map = new HashMap<>();
+		map.put("mobile",mobile);
+		map.put("checkcode",checkcode);
+		rabbitTemplate.convertAndSend("sms",map);
+		//在控制台显示一份
+		System.out.println("验证码："+checkcode);
+
+    }
 }

@@ -1,25 +1,18 @@
-package com.tensquare.search;
+package com.tensquare.sms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import util.IdWorker;
 
 /**
  * @Author zhang
- * @Date 2020/5/7 8:21
+ * @Date 2020/5/10 11:09
  * @Version 1.0
  */
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-public class SearchApplication {
+public class SmsApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SearchApplication.class,args);
-    }
-
-    @Bean
-    public IdWorker idWorker(){
-        return new IdWorker(1,1);
+        SpringApplication.run(SmsApplication.class);
     }
 }
