@@ -191,9 +191,18 @@ public class UserService {
 		Map<String,String> map = new HashMap<>();
 		map.put("mobile",mobile);
 		map.put("checkcode",checkcode);
-		rabbitTemplate.convertAndSend("sms",map);
+//		rabbitTemplate.convertAndSend("sms",map);
 		//在控制台显示一份
 		System.out.println("验证码："+checkcode);
 
     }
+
+
+	public User login(String mobile, String password) {
+    	User user = userDao.findByMobile(mobile);
+    	if (user != null && encoder.matches(password,user.getPassword())){
+    		return user;
+		}
+    	return null;
+	}
 }
