@@ -1,4 +1,5 @@
 package com.tensquare.user.controller;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.tensquare.user.pojo.Admin;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import util.JwtUtil;
+
 /**
  * 控制器层
  * @author Administrator
@@ -27,6 +30,9 @@ public class AdminController {
 
 	@Autowired
 	private AdminService adminService;
+
+	@Autowired
+	private JwtUtil jwtUtil;
 	
 	
 	/**
@@ -108,11 +114,15 @@ public class AdminController {
 	 * @param admin
 	 * @return
 	 */
-	@RequestMapping(value = "login",method = RequestMethod.POST)
+	@RequestMapping(value = "/login",method = RequestMethod.POST)
 	public Result login(@RequestBody Admin admin){
 		Admin adminLogin = adminService.login(admin);
 		if (adminLogin != null){
-			return new Result(true,StatusCode.OK,"登录成功");
+			String token = jwtUtil.createJWT(adminLogin.getId(),adminLogin.getLoginname(),"admin");
+			Map<String ,String> map = new HashMap<>();
+			map.put("token",token);
+			map.put("role","admin");
+			return new Result(true,StatusCode.OK,"登录成功",map);
 		}
 		return new Result(true,StatusCode.LOGINERROR,"登录失败");
 	}
