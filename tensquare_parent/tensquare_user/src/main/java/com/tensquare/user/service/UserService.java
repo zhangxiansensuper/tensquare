@@ -2,6 +2,7 @@ package com.tensquare.user.service;
 
 import com.tensquare.user.dao.UserDao;
 import com.tensquare.user.pojo.User;
+import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import util.IdWorker;
+import util.JwtUtil;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +46,12 @@ public class UserService {
 
 	@Autowired
 	private BCryptPasswordEncoder encoder;
+
+	@Autowired
+	private HttpServletRequest request;
+
+	@Autowired
+	private JwtUtil jwtUtil;
 
 	/**
 	 * 查询全部列表
@@ -119,6 +128,10 @@ public class UserService {
 	 * @param id
 	 */
 	public void deleteById(String id) {
+		Claims claims = (Claims) request.getAttribute("admin_claims");
+		if (claims == null){
+			throw new RuntimeException("无权删除！");
+		}
 		userDao.deleteById(id);
 	}
 
@@ -196,7 +209,6 @@ public class UserService {
 		System.out.println("验证码："+checkcode);
 
     }
-
 
 	public User login(String mobile, String password) {
     	User user = userDao.findByMobile(mobile);

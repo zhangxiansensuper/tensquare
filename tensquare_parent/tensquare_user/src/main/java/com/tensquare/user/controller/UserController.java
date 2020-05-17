@@ -1,4 +1,5 @@
 package com.tensquare.user.controller;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.tensquare.user.service.UserService;
@@ -17,6 +18,8 @@ import com.tensquare.user.pojo.User;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import util.JwtUtil;
+
 /**
  * 控制器层
  * @author Administrator
@@ -32,6 +35,9 @@ public class UserController {
 
 	@Autowired
 	private RedisTemplate redisTemplate;
+
+	@Autowired
+	private JwtUtil jwtUtil;
 
 	/**
 	 * 查询全部数据
@@ -106,7 +112,11 @@ public class UserController {
 	 */
 	@RequestMapping(value="/{id}",method= RequestMethod.DELETE)
 	public Result delete(@PathVariable String id ){
-		userService.deleteById(id);
+		try {
+			userService.deleteById(id);
+		} catch (Exception e) {
+			return new Result(true,StatusCode.OK,"删除失败");
+		}
 		return new Result(true,StatusCode.OK,"删除成功");
 	}
 
@@ -148,10 +158,16 @@ public class UserController {
 	@RequestMapping(value = "/login",method = RequestMethod.POST)
 	public Result login(@RequestBody User user){
 		user = userService.login(user.getMobile(),user.getPassword());
-		if (user == null){
-			return new Result(false,StatusCode.LOGINERROR,"登录失败！");
+		if (user != null){
+//			return new Result(false,StatusCode.LOGINERROR,"登录失败！");
+			String token = jwtUtil.createJWT(user.getId(),user.getNickname(),"user");
+			Map map = new HashMap();
+			map.put("token",token);
+			map.put("role","user");
+			map.put("name",user.getNickname());
+			return new Result(true,StatusCode.OK,"登录成功！",map);
 		}
-		return new Result(true,StatusCode.OK,"登录成功！");
+		return new Result(false,StatusCode.LOGINERROR,"登录失败！");
 	}
 	
 }
