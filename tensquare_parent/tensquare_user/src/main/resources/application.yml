@@ -15,7 +15,7 @@ spring:
     host: 192.168.121.128
   rabbitmq:
     host: 192.168.121.128
-  jwt:
-    config:
-       key: zhang
-       ttl: 3600000
+jwt:
+  config:
+     key: zhangzhe
+     ttl: 3600000

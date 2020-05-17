@@ -118,7 +118,9 @@ public class AdminController {
 	public Result login(@RequestBody Admin admin){
 		Admin adminLogin = adminService.login(admin);
 		if (adminLogin != null){
-			String token = jwtUtil.createJWT(adminLogin.getId(),adminLogin.getLoginname(),"admin");
+			String id = adminLogin.getId();
+			String loginName = adminLogin.getLoginname();
+			String token = jwtUtil.createJWT(id,loginName,"admin");
 			Map<String ,String> map = new HashMap<>();
 			map.put("token",token);
 			map.put("role","admin");
