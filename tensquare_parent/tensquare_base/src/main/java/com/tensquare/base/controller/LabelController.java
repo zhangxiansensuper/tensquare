@@ -41,8 +41,8 @@ public class LabelController {
      */
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
     public Result<Label> findById(@PathVariable String id){
-        return new Result(true,StatusCode.OK,"查询成功",
-                labelService.findById(id));
+        System.out.println("NO.1");
+        return new Result(true,StatusCode.OK,"查询成功",labelService.findById(id)  );
     }
 
     /**

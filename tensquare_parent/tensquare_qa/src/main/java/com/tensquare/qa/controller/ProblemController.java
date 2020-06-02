@@ -1,6 +1,7 @@
 package com.tensquare.qa.controller;
 import java.util.Map;
 
+import com.tensquare.qa.client.LabelClient;
 import com.tensquare.qa.intercepter.jwtintercepter.JwtIntercepter;
 import com.tensquare.qa.pojo.Problem;
 import com.tensquare.qa.service.ProblemService;
@@ -35,6 +36,9 @@ public class ProblemController {
 
 	@Autowired
 	private HttpServletRequest request;
+
+	@Autowired
+	private LabelClient labelClient;
 	
 	/**
 	 * 查询全部数据
@@ -155,5 +159,16 @@ public class ProblemController {
 		Page<Problem> pageWait = problemService.waitList(labelid, page ,size);
 		PageResult<Problem> pageResult = new PageResult<>(pageWait.getTotalElements(),pageWait.getContent());
 		return new Result(true, StatusCode.OK,"查询成功",pageResult);
+	}
+
+	/**
+	 * 查询标签分类
+	 * @param labelid
+	 * @return
+	 */
+	@RequestMapping(value = "/label/{labelid}")
+	public Result findLabelById(@PathVariable String labelid){
+		Result result = labelClient.findById(labelid);
+		return result;
 	}
 }

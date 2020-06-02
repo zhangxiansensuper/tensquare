@@ -42,8 +42,13 @@ public class LabelService {
         return labelDao.findAll();
     }
 
-    public Label findById(String id){
-        return labelDao.findById(id).get();
+    public Label findById(String id) {
+        try {
+            labelDao.findById(id).get();
+        }catch (Exception e) {
+            return null;
+        }
+        return  labelDao.findById(id).get();
     }
 
     /**
